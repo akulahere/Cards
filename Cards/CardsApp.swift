@@ -9,9 +9,12 @@ import SwiftUI
 
 @main
 struct CardsApp: App {
-    var body: some Scene {
-        WindowGroup {
-            ContentView()
-        }
+  @StateObject var viewState = ViewState()
+
+  var body: some Scene {
+    WindowGroup {
+      CardsView()
+        .environmentObject(viewState)
     }
+  }
 }
