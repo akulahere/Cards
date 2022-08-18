@@ -11,10 +11,49 @@ struct CardDetailView: View {
   @EnvironmentObject var viewState: ViewState
   @State private var currentModal: CardModal?
   @Binding var card: Card
+  @State private var stickerImage: UIImage?
+  @State private var images: [UIImage] = []
 
   var body: some View {
     content
+      .onDrop(of: [.image], isTargeted: nil) {
+        itemProviders, _ in
+        for item in itemProviders {
+          if item.canLoadObject(ofClass: UIImage.self) {
+            item.loadObject(ofClass: UIImage.self) { image, _ in
+              if let image = image as? UIImage {
+                DispatchQueue.main.async {
+                  card.addElement(uiImage: image)
+                }
+              }
+            }
+          }
+        } 
+        return true
+      }
       .modifier(CardToolbar(currentModal: $currentModal))
+      .sheet(item: $currentModal) { item in
+        switch item {
+        case .stickerPicker:
+          StickerPicker(stickerImage: $stickerImage)
+            .onDisappear {
+              if let stickerImage = stickerImage {
+                card.addElement(uiImage: stickerImage)
+              }
+              stickerImage = nil
+            }
+        case .photoPicker:
+          PhotoPicker(images: $images)
+            .onDisappear {
+              for image in images {
+                card.addElement(uiImage: image)
+              }
+              images = []
+            }
+        default:
+          EmptyView()
+        }
+      }
   }
   
   var content: some View {
