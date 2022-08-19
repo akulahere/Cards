@@ -23,11 +23,21 @@ struct CardElementView: View {
 struct ImageElementView: View {
   let element: ImageElement
 
-  var body: some View {
+  var bodyMain: some View {
     element.image
       .resizable()
       .aspectRatio(contentMode: .fit)
   }
+    
+  var body: some View {
+    if let frame = element.frame {
+      bodyMain
+        .clipShape(frame)
+    } else {
+      bodyMain
+    }
+  }
+
 }
 
 struct TextElementView: View {

@@ -13,24 +13,11 @@ struct CardDetailView: View {
   @Binding var card: Card
   @State private var stickerImage: UIImage?
   @State private var images: [UIImage] = []
+  @State private var frame: AnyShape?
 
   var body: some View {
     content
-      .onDrop(of: [.image], isTargeted: nil) {
-        itemProviders, _ in
-        for item in itemProviders {
-          if item.canLoadObject(ofClass: UIImage.self) {
-            item.loadObject(ofClass: UIImage.self) { image, _ in
-              if let image = image as? UIImage {
-                DispatchQueue.main.async {
-                  card.addElement(uiImage: image)
-                }
-              }
-            }
-          }
-        } 
-        return true
-      }
+      .onDrop(of: [.image], delegate: CardDrop(card: $card))
       .modifier(CardToolbar(currentModal: $currentModal))
       .sheet(item: $currentModal) { item in
         switch item {
@@ -50,6 +37,17 @@ struct CardDetailView: View {
               }
               images = []
             }
+        case .framePicker:
+          FramePicker(frame: $frame)
+            .onDisappear {
+              if let frame = frame {
+                card.update(
+                  viewState.selectedElement,
+                  frame: frame)
+              }
+              frame = nil
+            }
+
         default:
           EmptyView()
         }

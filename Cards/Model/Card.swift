@@ -24,5 +24,13 @@ struct Card: Identifiable {
     elements.append(element)
   }
 
+  mutating func update(_ element: CardElement?, frame: AnyShape) {
+    if let element = element as? ImageElement,
+       let index = element.index(in: elements) {
+      var newElement = element
+      newElement.frame = frame
+      elements[index] = newElement
+    }
+  }
 
 }
